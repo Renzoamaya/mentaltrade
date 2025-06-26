@@ -3,108 +3,119 @@
 import React, { useState, useEffect } from "react"
 import {
   ArrowLeft,
-  Brain,
+  BookOpen,
+  Plus,
+  Calendar,
   TrendingUp,
   Target,
-  Heart,
-  Award,
-  BarChart3,
-  Activity,
-  Clock,
-  CheckCircle,
+  Brain,
+  DollarSign,
+  Star,
   AlertTriangle,
-  Trophy,
-  Flame,
+  X,
+  Search,
+  Download,
   Eye,
-  Play,
-  Pause,
-  RotateCcw,
-  Volume2,
-  VolumeX,
+  BarChart3,
   Smile,
   Frown,
   Meh,
-  TrendingDown,
+  Zap,
+  Shield,
 } from "lucide-react"
 
-export default function ProgresoMental({ onBack }) {
+export default function RegistroDiario({ onBack }) {
   const [currentTime, setCurrentTime] = useState(new Date())
-  const [activeTab, setActiveTab] = useState("dashboard")
-  const [meditationTimer, setMeditationTimer] = useState(300) // 5 minutos
-  const [isTimerRunning, setIsTimerRunning] = useState(false)
-  const [timerDisplay, setTimerDisplay] = useState(300)
-  const [soundEnabled, setSoundEnabled] = useState(true)
+  const [activeTab, setActiveTab] = useState("hoy")
+  const [showNewEntry, setShowNewEntry] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterBy, setFilterBy] = useState("todos")
   const [selectedPeriod, setSelectedPeriod] = useState("semana")
 
-  // Datos simulados de progreso mental
-  const [mentalStats, setMentalStats] = useState({
-    bienestarGeneral: 78,
-    controlEmocional: 85,
-    disciplina: 72,
-    confianza: 80,
-    estres: 35,
-    motivacion: 88,
-    rachaActual: 12,
-    mejorRacha: 28,
-    sesionesCompletadas: 45,
-    tiempoMeditacion: 1250, // minutos
-    objetivosSemana: 5,
-    objetivosCompletados: 3,
+  // Estados para nueva entrada
+  const [newEntry, setNewEntry] = useState({
+    date: new Date().toISOString().split("T")[0],
+    trades: [],
+    emotions: {
+      preSession: "neutral",
+      postSession: "neutral",
+      energy: 75,
+      stress: 30,
+      confidence: 70,
+    },
+    goals: [],
+    learnings: "",
+    improvements: "",
+    gratitude: "",
+    tomorrowPlan: "",
+    marketConditions: "",
+    sessionRating: 5,
   })
 
-  const [dailyMood, setDailyMood] = useState([
-    { fecha: "2024-01-15", mood: "happy", energia: 85, estres: 20 },
-    { fecha: "2024-01-14", mood: "neutral", energia: 70, estres: 40 },
-    { fecha: "2024-01-13", mood: "sad", energia: 60, estres: 60 },
-    { fecha: "2024-01-12", mood: "happy", energia: 90, estres: 15 },
-    { fecha: "2024-01-11", mood: "neutral", energia: 75, estres: 30 },
-    { fecha: "2024-01-10", mood: "happy", energia: 88, estres: 25 },
-    { fecha: "2024-01-09", mood: "happy", energia: 82, estres: 18 },
-  ])
-
-  const [exercises, setExercises] = useState([
+  // Datos simulados de entradas de journal
+  const [journalEntries, setJournalEntries] = useState([
     {
       id: 1,
-      titulo: "Respiración 4-7-8",
-      descripcion: "Técnica de respiración para reducir ansiedad",
-      duracion: 5,
-      categoria: "respiracion",
-      completado: false,
-      beneficios: ["Reduce ansiedad", "Mejora concentración", "Calma la mente"],
+      date: "2024-01-15",
+      trades: [
+        { pair: "EUR/USD", type: "BUY", result: 45.5, emotion: "confident", time: "10:30" },
+        { pair: "GBP/JPY", type: "SELL", result: -23.75, emotion: "frustrated", time: "14:15" },
+      ],
+      emotions: {
+        preSession: "excited",
+        postSession: "neutral",
+        energy: 85,
+        stress: 40,
+        confidence: 75,
+      },
+      goals: ["Máximo 3 trades", "Respetar stop loss", "Meditar antes de tradear"],
+      learnings:
+        "Noté que cuando el mercado está muy volátil, tiendo a ser más impulsivo. Debo respirar más profundo antes de entrar.",
+      improvements: "Implementar una pausa de 30 segundos antes de cada trade.",
+      gratitude: "Agradecido por mantener la disciplina en el segundo trade a pesar de la pérdida.",
+      tomorrowPlan: "Enfocarme en EUR/USD únicamente. Revisar análisis técnico antes de la sesión.",
+      marketConditions: "Mercado volátil por noticias de BCE. Spreads más amplios de lo normal.",
+      sessionRating: 7,
+      totalPnL: 21.75,
+      tradesCount: 2,
+      winRate: 50,
     },
     {
       id: 2,
-      titulo: "Visualización de Éxito",
-      descripcion: "Imagina tus trades exitosos en detalle",
-      duracion: 10,
-      categoria: "visualizacion",
-      completado: true,
-      beneficios: ["Aumenta confianza", "Mejora rendimiento", "Reduce miedo"],
-    },
-    {
-      id: 3,
-      titulo: "Mindfulness Trading",
-      descripcion: "Mantén atención plena durante el trading",
-      duracion: 15,
-      categoria: "mindfulness",
-      completado: false,
-      beneficios: ["Mejora decisiones", "Reduce impulsividad", "Aumenta claridad"],
-    },
-    {
-      id: 4,
-      titulo: "Relajación Muscular",
-      descripcion: "Libera tensión física acumulada",
-      duracion: 12,
-      categoria: "relajacion",
-      completado: false,
-      beneficios: ["Reduce tensión", "Mejora bienestar", "Aumenta energía"],
+      date: "2024-01-14",
+      trades: [
+        { pair: "USD/JPY", type: "BUY", result: 67.25, emotion: "confident", time: "09:45" },
+        { pair: "AUD/USD", type: "SELL", result: 89.1, emotion: "excited", time: "11:20" },
+        { pair: "EUR/GBP", type: "BUY", result: -45.3, emotion: "anxious", time: "15:45" },
+      ],
+      emotions: {
+        preSession: "confident",
+        postSession: "satisfied",
+        energy: 90,
+        stress: 25,
+        confidence: 85,
+      },
+      goals: ["Mantener win rate >70%", "No más de 3 trades", "Seguir plan estrictamente"],
+      learnings:
+        "Excelente día de trading. Mi análisis pre-mercado fue muy acertado. La clave fue esperar las confirmaciones.",
+      improvements: "Continuar con la rutina actual. Tal vez aumentar ligeramente el tamaño de posición.",
+      gratitude: "Muy agradecido por la paciencia mostrada en las primeras dos operaciones.",
+      tomorrowPlan: "Mantener la misma estrategia. Buscar setups similares en las mismas sesiones.",
+      marketConditions: "Tendencia clara en USD. Datos económicos favorables. Baja volatilidad.",
+      sessionRating: 9,
+      totalPnL: 111.05,
+      tradesCount: 3,
+      winRate: 67,
     },
   ])
 
-  const moods = {
-    happy: { icon: Smile, label: "Feliz", color: "text-green-400", bg: "bg-green-500/20" },
+  const emociones = {
+    excited: { icon: Zap, label: "Emocionado", color: "text-yellow-400", bg: "bg-yellow-500/20" },
+    confident: { icon: Shield, label: "Confiado", color: "text-green-400", bg: "bg-green-500/20" },
     neutral: { icon: Meh, label: "Neutral", color: "text-blue-400", bg: "bg-blue-500/20" },
-    sad: { icon: Frown, label: "Triste", color: "text-red-400", bg: "bg-red-500/20" },
+    anxious: { icon: AlertTriangle, label: "Ansioso", color: "text-orange-400", bg: "bg-orange-500/20" },
+    frustrated: { icon: Frown, label: "Frustrado", color: "text-red-400", bg: "bg-red-500/20" },
+    satisfied: { icon: Smile, label: "Satisfecho", color: "text-emerald-400", bg: "bg-emerald-500/20" },
   }
 
   useEffect(() => {
@@ -112,58 +123,86 @@ export default function ProgresoMental({ onBack }) {
     return () => clearInterval(timer)
   }, [])
 
-  // Timer de meditación
-  useEffect(() => {
-    let interval
-    if (isTimerRunning && timerDisplay > 0) {
-      interval = setInterval(() => {
-        setTimerDisplay((prev) => prev - 1)
-      }, 1000)
-    } else if (timerDisplay === 0) {
-      setIsTimerRunning(false)
-      if (soundEnabled) {
-        // Aquí iría el sonido de finalización
-        console.log("🔔 Sesión de meditación completada!")
-      }
-      // Actualizar estadísticas
-      setMentalStats((prev) => ({
-        ...prev,
-        sesionesCompletadas: prev.sesionesCompletadas + 1,
-        tiempoMeditacion: prev.tiempoMeditacion + meditationTimer / 60,
-      }))
+  const filteredEntries = journalEntries.filter((entry) => {
+    const matchesSearch =
+      entry.learnings.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      entry.improvements.toLowerCase().includes(searchTerm.toLowerCase())
+
+    if (filterBy === "todos") return matchesSearch
+    if (filterBy === "profitable") return entry.totalPnL > 0 && matchesSearch
+    if (filterBy === "loss") return entry.totalPnL < 0 && matchesSearch
+    if (filterBy === "highRating") return entry.sessionRating >= 8 && matchesSearch
+
+    return matchesSearch
+  })
+
+  const saveNewEntry = () => {
+    const entry = {
+      id: Date.now(),
+      date: newEntry.date,
+      trades: newEntry.trades,
+      emotions: newEntry.emotions,
+      goals: newEntry.goals,
+      learnings: newEntry.learnings,
+      improvements: newEntry.improvements,
+      gratitude: newEntry.gratitude,
+      tomorrowPlan: newEntry.tomorrowPlan,
+      marketConditions: newEntry.marketConditions,
+      sessionRating: newEntry.sessionRating,
+      totalPnL: newEntry.trades.reduce((sum, trade) => sum + trade.result, 0),
+      tradesCount: newEntry.trades.length,
+      winRate:
+        newEntry.trades.length > 0
+          ? (newEntry.trades.filter((t) => t.result > 0).length / newEntry.trades.length) * 100
+          : 0,
     }
-    return () => clearInterval(interval)
-  }, [isTimerRunning, timerDisplay, soundEnabled, meditationTimer])
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
+    setJournalEntries((prev) => [entry, ...prev])
+    setShowNewEntry(false)
+
+    // Reset form
+    setNewEntry({
+      date: new Date().toISOString().split("T")[0],
+      trades: [],
+      emotions: {
+        preSession: "neutral",
+        postSession: "neutral",
+        energy: 75,
+        stress: 30,
+        confidence: 70,
+      },
+      goals: [],
+      learnings: "",
+      improvements: "",
+      gratitude: "",
+      tomorrowPlan: "",
+      marketConditions: "",
+      sessionRating: 5,
+    })
   }
 
-  const startTimer = () => {
-    setIsTimerRunning(true)
-  }
-
-  const pauseTimer = () => {
-    setIsTimerRunning(false)
-  }
-
-  const resetTimer = () => {
-    setIsTimerRunning(false)
-    setTimerDisplay(meditationTimer)
-  }
-
-  const completeExercise = (id) => {
-    setExercises((prev) => prev.map((ex) => (ex.id === id ? { ...ex, completado: !ex.completado } : ex)))
+  const addTrade = () => {
+    setNewEntry((prev) => ({
+      ...prev,
+      trades: [
+        ...prev.trades,
+        {
+          pair: "",
+          type: "BUY",
+          result: 0,
+          emotion: "neutral",
+          time: new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }),
+        },
+      ],
+    }))
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950 text-white relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white relative overflow-hidden">
       {/* Elementos de fondo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.05)_1px,transparent_0)] bg-[size:20px_20px] pointer-events-none"></div>
@@ -181,713 +220,958 @@ export default function ProgresoMental({ onBack }) {
             </button>
 
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <select
-                  value={selectedPeriod}
-                  onChange={(e) => setSelectedPeriod(e.target.value)}
-                  className="px-3 py-1 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:border-purple-500 focus:outline-none"
-                >
-                  <option value="semana">Última semana</option>
-                  <option value="mes">Último mes</option>
-                  <option value="trimestre">Último trimestre</option>
-                </select>
-              </div>
+              <button
+                onClick={() => setShowNewEntry(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 rounded-xl transition-all duration-300"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Nueva Entrada</span>
+              </button>
+
               <div className="text-right">
-                <p className="text-lg font-mono font-bold text-purple-400">{currentTime.toLocaleTimeString("es-AR")}</p>
-                <p className="text-xs text-slate-400">Tiempo Real</p>
+                <p className="text-lg font-mono font-bold text-blue-400">{currentTime.toLocaleTimeString("es-AR")}</p>
+                <p className="text-xs text-slate-400">{currentTime.toLocaleDateString("es-AR")}</p>
               </div>
             </div>
           </div>
 
           <div className="mb-6">
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-              Progreso Mental
+            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              Registro Diario de Trading
             </h1>
             <p className="text-slate-400 max-w-3xl">
-              Centro de bienestar psicológico para traders. Monitorea tu salud mental, practica mindfulness y desarrolla
-              disciplina emocional.
+              Tu journal personal de trading. Registra trades, emociones, aprendizajes y planifica tus próximas
+              sesiones.
             </p>
           </div>
 
-          {/* Métricas principales */}
+          {/* Estadísticas rápidas */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <MetricCard
-              icon={Brain}
-              label="Bienestar General"
-              value={`${mentalStats.bienestarGeneral}%`}
-              color="from-purple-500 to-pink-500"
-              trend="up"
-            />
-            <MetricCard
-              icon={Heart}
-              label="Control Emocional"
-              value={`${mentalStats.controlEmocional}%`}
-              color="from-red-500 to-pink-500"
-              trend="up"
-            />
-            <MetricCard
-              icon={Target}
-              label="Disciplina"
-              value={`${mentalStats.disciplina}%`}
-              color="from-blue-500 to-cyan-500"
-              trend="stable"
-            />
-            <MetricCard
-              icon={Flame}
-              label="Racha Actual"
-              value={`${mentalStats.rachaActual} días`}
-              color="from-orange-500 to-red-500"
-              trend="up"
-            />
+            <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-600/30 backdrop-blur-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <BookOpen className="w-5 h-5 text-blue-400" />
+                <span className="text-sm text-slate-400">Entradas</span>
+              </div>
+              <p className="text-2xl font-bold text-white">{journalEntries.length}</p>
+            </div>
+            <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-600/30 backdrop-blur-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <DollarSign className="w-5 h-5 text-green-400" />
+                <span className="text-sm text-slate-400">PnL Promedio</span>
+              </div>
+              <p className="text-2xl font-bold text-green-400">
+                $
+                {(journalEntries.reduce((sum, entry) => sum + entry.totalPnL, 0) / journalEntries.length || 0).toFixed(
+                  2,
+                )}
+              </p>
+            </div>
+            <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-600/30 backdrop-blur-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <Target className="w-5 h-5 text-purple-400" />
+                <span className="text-sm text-slate-400">Win Rate</span>
+              </div>
+              <p className="text-2xl font-bold text-purple-400">
+                {Math.round(journalEntries.reduce((sum, entry) => sum + entry.winRate, 0) / journalEntries.length || 0)}
+                %
+              </p>
+            </div>
+            <div className="bg-slate-800/30 rounded-xl p-4 border border-slate-600/30 backdrop-blur-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <Star className="w-5 h-5 text-yellow-400" />
+                <span className="text-sm text-slate-400">Rating Promedio</span>
+              </div>
+              <p className="text-2xl font-bold text-yellow-400">
+                {(
+                  journalEntries.reduce((sum, entry) => sum + entry.sessionRating, 0) / journalEntries.length || 0
+                ).toFixed(1)}
+              </p>
+            </div>
           </div>
         </header>
 
-        {/* Navegación por tabs */}
+        {/* Navegación y filtros */}
         <div className="mb-8">
-          <div className="flex space-x-1 bg-slate-800/30 p-1 rounded-xl border border-slate-600/30 backdrop-blur-sm">
-            {[
-              { id: "dashboard", label: "Dashboard", icon: BarChart3 },
-              { id: "meditacion", label: "Meditación", icon: Brain },
-              { id: "ejercicios", label: "Ejercicios", icon: Activity },
-              { id: "analisis", label: "Análisis", icon: TrendingUp },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                  activeTab === tab.id
-                    ? "bg-purple-600 text-white shadow-lg"
-                    : "text-slate-400 hover:text-white hover:bg-slate-700/50"
-                }`}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+            {/* Tabs */}
+            <div className="flex space-x-1 bg-slate-800/30 p-1 rounded-xl border border-slate-600/30 backdrop-blur-sm">
+              {[
+                { id: "hoy", label: "Hoy", icon: Calendar },
+                { id: "historial", label: "Historial", icon: BookOpen },
+                { id: "analisis", label: "Análisis", icon: BarChart3 },
+                { id: "insights", label: "Insights", icon: Brain },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                    activeTab === tab.id
+                      ? "bg-blue-600 text-white shadow-lg"
+                      : "text-slate-400 hover:text-white hover:bg-slate-700/50"
+                  }`}
+                >
+                  <tab.icon className="w-4 h-4" />
+                  <span className="font-medium">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Filtros y búsqueda */}
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar en entradas..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none w-64"
+                />
+              </div>
+
+              <select
+                value={filterBy}
+                onChange={(e) => setFilterBy(e.target.value)}
+                className="px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none"
               >
-                <tab.icon className="w-4 h-4" />
-                <span className="font-medium">{tab.label}</span>
+                <option value="todos">Todas las entradas</option>
+                <option value="profitable">Solo rentables</option>
+                <option value="loss">Solo pérdidas</option>
+                <option value="highRating">Rating alto (8+)</option>
+              </select>
+
+              <button className="p-2 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg transition-colors">
+                <Download className="w-4 h-4 text-slate-400" />
               </button>
-            ))}
+            </div>
           </div>
         </div>
 
         {/* Contenido según tab */}
-        {activeTab === "dashboard" && (
-          <DashboardTab mentalStats={mentalStats} dailyMood={dailyMood} moods={moods} exercises={exercises} />
+        {activeTab === "hoy" && (
+          <TodayTab journalEntries={journalEntries} emociones={emociones} onNewEntry={() => setShowNewEntry(true)} />
         )}
 
-        {activeTab === "meditacion" && (
-          <MeditacionTab
-            timerDisplay={timerDisplay}
-            isTimerRunning={isTimerRunning}
-            meditationTimer={meditationTimer}
-            setMeditationTimer={setMeditationTimer}
-            soundEnabled={soundEnabled}
-            setSoundEnabled={setSoundEnabled}
-            startTimer={startTimer}
-            pauseTimer={pauseTimer}
-            resetTimer={resetTimer}
-            formatTime={formatTime}
-            mentalStats={mentalStats}
-          />
+        {activeTab === "historial" && (
+          <HistorialTab entries={filteredEntries} emociones={emociones} searchTerm={searchTerm} />
         )}
-
-        {activeTab === "ejercicios" && <EjerciciosTab exercises={exercises} completeExercise={completeExercise} />}
 
         {activeTab === "analisis" && (
-          <AnalisisTab mentalStats={mentalStats} dailyMood={dailyMood} moods={moods} selectedPeriod={selectedPeriod} />
+          <AnalysisTab entries={journalEntries} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} />
         )}
+
+        {activeTab === "insights" && <InsightsTab entries={journalEntries} emociones={emociones} />}
       </div>
+
+      {/* Modal nueva entrada */}
+      {showNewEntry && (
+        <NewEntryModal
+          entry={newEntry}
+          setEntry={setNewEntry}
+          emociones={emociones}
+          onSave={saveNewEntry}
+          onClose={() => setShowNewEntry(false)}
+          addTrade={addTrade}
+        />
+      )}
     </div>
   )
 }
 
-// Componente MetricCard
-function MetricCard({ icon: Icon, label, value, color, trend }) {
-  const trendIcons = {
-    up: TrendingUp,
-    down: TrendingDown,
-    stable: Activity,
-  }
+// Tab de Hoy
+function TodayTab({ journalEntries, emociones, onNewEntry }) {
+  const today = new Date().toISOString().split("T")[0]
+  const todayEntry = journalEntries.find((entry) => entry.date === today)
 
-  const TrendIcon = trendIcons[trend]
-
-  return (
-    <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-600/30 hover:border-slate-500/50 transition-all duration-300 group">
-      <div className="flex items-center justify-between mb-3">
-        <div
-          className={`w-10 h-10 bg-gradient-to-r ${color} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+  if (!todayEntry) {
+    return (
+      <div className="text-center py-12">
+        <Calendar className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+        <h3 className="text-xl font-bold text-white mb-2">No hay entrada para hoy</h3>
+        <p className="text-slate-400 mb-6">Comienza registrando tu sesión de trading de hoy.</p>
+        <button
+          onClick={onNewEntry}
+          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 rounded-xl transition-all duration-300 font-semibold"
         >
-          <Icon className="w-5 h-5 text-white" />
-        </div>
-        {trend && (
-          <div
-            className={`p-1 rounded-lg ${
-              trend === "up" ? "bg-green-500/20" : trend === "down" ? "bg-red-500/20" : "bg-blue-500/20"
-            }`}
-          >
-            <TrendIcon
-              className={`w-3 h-3 ${
-                trend === "up" ? "text-green-400" : trend === "down" ? "text-red-400" : "text-blue-400"
-              }`}
-            />
-          </div>
-        )}
+          Crear Entrada de Hoy
+        </button>
       </div>
-      <p className="text-xl font-bold text-white mb-1">{value}</p>
-      <p className="text-xs text-slate-400">{label}</p>
-    </div>
-  )
-}
-
-// Tab Dashboard
-function DashboardTab({ mentalStats, dailyMood, moods, exercises }) {
-  const completedExercises = exercises.filter((ex) => ex.completado).length
-  const totalExercises = exercises.length
-
-  return (
-    <div className="space-y-6">
-      {/* Estado actual */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Bienestar general */}
-        <div className="bg-slate-800/30 rounded-2xl p-6 border border-slate-600/30 backdrop-blur-sm">
-          <div className="flex items-center gap-3 mb-6">
-            <Heart className="text-pink-400 w-5 h-5" />
-            <h3 className="text-xl font-bold text-white">Estado Mental Actual</h3>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-400">Bienestar General</span>
-              <span className="text-sm font-medium text-white">{mentalStats.bienestarGeneral}%</span>
-            </div>
-            <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-purple-500 to-pink-400 h-full rounded-full transition-all duration-1000"
-                style={{ width: `${mentalStats.bienestarGeneral}%` }}
-              ></div>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-400">Control Emocional</span>
-              <span className="text-sm font-medium text-white">{mentalStats.controlEmocional}%</span>
-            </div>
-            <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-blue-500 to-cyan-400 h-full rounded-full transition-all duration-1000"
-                style={{ width: `${mentalStats.controlEmocional}%` }}
-              ></div>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-400">Nivel de Estrés</span>
-              <span className="text-sm font-medium text-white">{mentalStats.estres}%</span>
-            </div>
-            <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-red-500 to-orange-400 h-full rounded-full transition-all duration-1000"
-                style={{ width: `${mentalStats.estres}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Estado de ánimo semanal */}
-        <div className="bg-slate-800/30 rounded-2xl p-6 border border-slate-600/30 backdrop-blur-sm">
-          <div className="flex items-center gap-3 mb-6">
-            <Smile className="text-yellow-400 w-5 h-5" />
-            <h3 className="text-xl font-bold text-white">Estado de Ánimo Semanal</h3>
-          </div>
-
-          <div className="space-y-3">
-            {dailyMood.slice(0, 7).map((day, index) => (
-              <div key={day.fecha} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-slate-400 w-16">
-                    {new Date(day.fecha).toLocaleDateString("es-AR", { weekday: "short" })}
-                  </span>
-                  <div className={`flex items-center gap-2 px-2 py-1 rounded-lg ${moods[day.mood].bg}`}>
-                    {React.createElement(moods[day.mood].icon, {
-                      className: `w-4 h-4 ${moods[day.mood].color}`,
-                    })}
-                    <span className="text-xs text-white">{moods[day.mood].label}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-12 bg-slate-700 rounded-full h-2">
-                    <div
-                      className="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all duration-500"
-                      style={{ width: `${day.energia}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-xs text-slate-400 w-8">{day.energia}%</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Progreso de ejercicios */}
-      <div className="bg-slate-800/30 rounded-2xl p-6 border border-slate-600/30 backdrop-blur-sm">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Activity className="text-green-400 w-5 h-5" />
-            <h3 className="text-xl font-bold text-white">Progreso de Ejercicios</h3>
-          </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-white">
-              {exercises.filter((ex) => ex.completado).length}/{exercises.length}
-            </p>
-            <p className="text-xs text-slate-400">Completados hoy</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {exercises.slice(0, 4).map((exercise) => (
-            <div
-              key={exercise.id}
-              className={`p-4 rounded-xl border transition-all duration-300 ${
-                exercise.completado ? "bg-green-500/20 border-green-500/50" : "bg-slate-700/30 border-slate-600/30"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-white text-sm">{exercise.titulo}</h4>
-                {exercise.completado && <CheckCircle className="w-4 h-4 text-green-400" />}
-              </div>
-              <p className="text-xs text-slate-400 mb-2">{exercise.descripcion}</p>
-              <div className="flex items-center gap-2 mb-4">
-                <Clock className="w-4 h-4 text-slate-500" />
-                <span className="text-sm text-slate-400">{exercise.duracion} min</span>
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-slate-300">Beneficios:</h4>
-                <ul className="space-y-1">
-                  {exercise.beneficios.map((beneficio, index) => (
-                    <li key={index} className="flex items-center gap-2 text-sm text-slate-400">
-                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full"></div>
-                      {beneficio}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <button
-                className={`w-full mt-4 px-4 py-2 rounded-lg transition-all duration-300 ${
-                  exercise.completado
-                    ? "bg-green-500/20 text-green-400 cursor-default"
-                    : "bg-gradient-to-r from-purple-600 to-pink-600 hover:brightness-110 text-white"
-                }`}
-              >
-                {exercise.completado ? "Completado ✓" : "Comenzar Ejercicio"}
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Estadísticas rápidas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-slate-800/30 rounded-2xl p-4 border border-slate-600/30 backdrop-blur-sm text-center">
-          <Trophy className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-white mb-2">{mentalStats.mejorRacha}</p>
-          <p className="text-xs text-slate-400">Mejor racha</p>
-        </div>
-        <div className="bg-slate-800/30 rounded-2xl p-4 border border-slate-600/30 backdrop-blur-sm text-center">
-          <Brain className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-white mb-2">{mentalStats.sesionesCompletadas}</p>
-          <p className="text-xs text-slate-400">Sesiones completadas</p>
-        </div>
-        <div className="bg-slate-800/30 rounded-2xl p-4 border border-slate-600/30 backdrop-blur-sm text-center">
-          <Clock className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-white">{Math.round(mentalStats.tiempoMeditacion / 60)}h</p>
-          <p className="text-xs text-slate-400">Tiempo meditación</p>
-        </div>
-        <div className="bg-slate-800/30 rounded-2xl p-4 border border-slate-600/30 backdrop-blur-sm text-center">
-          <Target className="w-8 h-8 text-green-400 mx-auto mb-2" />
-          <p className="text-2xl font-bold text-white">
-            {mentalStats.objetivosCompletados}/{mentalStats.objetivosSemana}
-          </p>
-          <p className="text-xs text-slate-400">Objetivos semana</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Tab Meditación
-function MeditacionTab({
-  timerDisplay,
-  isTimerRunning,
-  meditationTimer,
-  setMeditationTimer,
-  soundEnabled,
-  setSoundEnabled,
-  startTimer,
-  pauseTimer,
-  resetTimer,
-  formatTime,
-  mentalStats,
-}) {
-  const presets = [
-    { label: "5 min", value: 300 },
-    { label: "10 min", value: 600 },
-    { label: "15 min", value: 900 },
-    { label: "20 min", value: 1200 },
-  ]
-
-  return (
-    <div className="space-y-6">
-      {/* Timer principal */}
-      <div className="bg-slate-800/30 rounded-2xl p-8 border border-slate-600/30 backdrop-blur-sm text-center">
-        <div className="mb-8">
-          <h3 className="text-2xl font-bold text-white mb-2">Sesión de Meditación</h3>
-          <p className="text-slate-400">Encuentra tu centro antes de tradear</p>
-        </div>
-
-        {/* Display del timer */}
-        <div className="mb-8">
-          <div className="w-48 h-48 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-6 relative">
-            <div className="w-40 h-40 bg-slate-800/50 rounded-full flex items-center justify-center">
-              <span className="text-4xl font-mono font-bold text-white">{formatTime(timerDisplay)}</span>
-            </div>
-            {/* Círculo de progreso */}
-            <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
-              <circle
-                cx="50"
-                cy="50"
-                r="45"
-                stroke="currentColor"
-                strokeWidth="2"
-                fill="none"
-                className="text-slate-700"
-              />
-              <circle
-                cx="50"
-                cy="50"
-                r="45"
-                stroke="currentColor"
-                strokeWidth="2"
-                fill="none"
-                strokeDasharray={`${2 * Math.PI * 45}`}
-                strokeDashoffset={`${2 * Math.PI * 45 * (1 - (meditationTimer - timerDisplay) / meditationTimer)}`}
-                className="text-purple-400 transition-all duration-1000"
-              />
-            </svg>
-          </div>
-        </div>
-
-        {/* Controles */}
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <button
-            onClick={isTimerRunning ? pauseTimer : startTimer}
-            className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 hover:brightness-110 rounded-full flex items-center justify-center transition-all duration-300"
-          >
-            {isTimerRunning ? <Pause className="w-8 h-8 text-white" /> : <Play className="w-8 h-8 text-white ml-1" />}
-          </button>
-          <button
-            onClick={resetTimer}
-            className="w-12 h-12 bg-slate-700/50 hover:bg-slate-600/50 rounded-full flex items-center justify-center transition-colors duration-300"
-          >
-            <RotateCcw className="w-5 h-5 text-slate-400" />
-          </button>
-          <button
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            className="w-12 h-12 bg-slate-700/50 hover:bg-slate-600/50 rounded-full flex items-center justify-center transition-colors duration-300"
-          >
-            {soundEnabled ? (
-              <Volume2 className="w-5 h-5 text-slate-400" />
-            ) : (
-              <VolumeX className="w-5 h-5 text-slate-400" />
-            )}
-          </button>
-        </div>
-
-        {/* Presets de tiempo */}
-        <div className="flex justify-center gap-2">
-          {presets.map((preset) => (
-            <button
-              key={preset.value}
-              onClick={() => {
-                setMeditationTimer(preset.value)
-                setTimerDisplay(preset.value)
-              }}
-              className={`px-4 py-2 rounded-lg transition-all duration-300 ${
-                meditationTimer === preset.value
-                  ? "bg-purple-600 text-white"
-                  : "bg-slate-700/50 text-slate-400 hover:bg-slate-600/50"
-              }`}
-            >
-              {preset.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Técnicas de meditación */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-slate-800/30 rounded-2xl p-6 border border-slate-600/30 backdrop-blur-sm">
-          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <Brain className="w-5 h-5 text-purple-400" />
-            Técnicas Recomendadas
-          </h3>
-          <div className="space-y-4">
-            <div className="p-4 bg-slate-700/30 rounded-xl">
-              <h4 className="font-semibold text-white mb-2">Respiración Consciente</h4>
-              <p className="text-sm text-slate-400">Enfócate en tu respiración natural. Ideal para principiantes.</p>
-            </div>
-            <div className="p-4 bg-slate-700/30 rounded-xl">
-              <h4 className="font-semibold text-white mb-2">Body Scan</h4>
-              <p className="text-sm text-slate-400">Recorre mentalmente tu cuerpo liberando tensiones.</p>
-            </div>
-            <div className="p-4 bg-slate-700/30 rounded-xl">
-              <h4 className="font-semibold text-white mb-2">Visualización</h4>
-              <p className="text-sm text-slate-400">Imagina escenarios de trading exitosos y calmados.</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-slate-800/30 rounded-2xl p-6 border border-slate-600/30 backdrop-blur-sm">
-          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <Award className="w-5 h-5 text-yellow-400" />
-            Tu Progreso
-          </h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-400">Sesiones completadas</span>
-              <span className="text-lg font-bold text-white">{mentalStats.sesionesCompletadas}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-400">Tiempo total</span>
-              <span className="text-lg font-bold text-white">
-                {Math.round(mentalStats.tiempoMeditacion / 60)}h {mentalStats.tiempoMeditacion % 60}m
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-400">Racha actual</span>
-              <span className="text-lg font-bold text-white">{mentalStats.rachaActual} días</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-400">Mejor racha</span>
-              <span className="text-lg font-bold text-white">{mentalStats.mejorRacha} días</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Tab Ejercicios
-function EjerciciosTab({ exercises, completeExercise }) {
-  const categorias = {
-    respiracion: { label: "Respiración", color: "from-blue-500 to-cyan-500", icon: Activity },
-    visualizacion: { label: "Visualización", color: "from-purple-500 to-pink-500", icon: Eye },
-    mindfulness: { label: "Mindfulness", color: "from-green-500 to-emerald-500", icon: Brain },
-    relajacion: { label: "Relajación", color: "from-orange-500 to-red-500", icon: Heart },
+    )
   }
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {exercises.map((exercise) => (
-          <div
-            key={exercise.id}
-            className={`bg-slate-800/30 rounded-2xl p-6 border backdrop-blur-sm transition-all duration-300 ${
-              exercise.completado
-                ? "border-green-500/50 bg-green-500/10"
-                : "border-slate-600/30 hover:border-slate-500/50"
-            }`}
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-12 h-12 bg-gradient-to-r ${categorias[exercise.categoria].color} rounded-xl flex items-center justify-center`}
-                >
-                  {React.createElement(categorias[exercise.categoria].icon, {
-                    className: "w-6 h-6 text-white",
-                  })}
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white">{exercise.titulo}</h3>
-                  <p className="text-sm text-slate-400">{categorias[exercise.categoria].label}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => completeExercise(exercise.id)}
-                className={`p-2 rounded-lg transition-all duration-300 ${
-                  exercise.completado
-                    ? "bg-green-500/20 text-green-400"
-                    : "bg-slate-700/50 text-slate-400 hover:bg-slate-600/50"
-                }`}
-              >
-                <CheckCircle className="w-5 h-5" />
-              </button>
-            </div>
-
-            <p className="text-slate-300 mb-4">{exercise.descripcion}</p>
-
-            <div className="flex items-center gap-2 mb-4">
-              <Clock className="w-4 h-4 text-slate-500" />
-              <span className="text-sm text-slate-400">{exercise.duracion} minutos</span>
-            </div>
-
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium text-slate-300">Beneficios:</h4>
-              <ul className="space-y-1">
-                {exercise.beneficios.map((beneficio, index) => (
-                  <li key={index} className="flex items-center gap-2 text-sm text-slate-400">
-                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full"></div>
-                    {beneficio}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <button
-              className={`w-full mt-4 px-4 py-2 rounded-lg transition-all duration-300 ${
-                exercise.completado
-                  ? "bg-green-500/20 text-green-400 cursor-default"
-                  : "bg-gradient-to-r from-purple-600 to-pink-600 hover:brightness-110 text-white"
-              }`}
-            >
-              {exercise.completado ? "Completado ✓" : "Comenzar Ejercicio"}
-            </button>
-          </div>
-        ))}
-      </div>
+      <EntryCard entry={todayEntry} emociones={emociones} isToday={true} />
     </div>
   )
 }
 
-// Tab Análisis
-function AnalisisTab({ mentalStats, dailyMood, moods, selectedPeriod }) {
-  const promedioEnergia = dailyMood.reduce((acc, day) => acc + day.energia, 0) / dailyMood.length
-  const promedioEstres = dailyMood.reduce((acc, day) => acc + day.estres, 0) / dailyMood.length
+// Tab de Historial
+function HistorialTab({ entries, emociones, searchTerm }) {
+  return (
+    <div className="space-y-6">
+      {entries.length === 0 ? (
+        <div className="text-center py-12">
+          <Search className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2">No se encontraron entradas</h3>
+          <p className="text-slate-400">
+            {searchTerm ? `No hay resultados para "${searchTerm}"` : "No hay entradas que coincidan con el filtro."}
+          </p>
+        </div>
+      ) : (
+        entries.map((entry) => <EntryCard key={entry.id} entry={entry} emociones={emociones} />)
+      )}
+    </div>
+  )
+}
 
-  const distribucionMood = dailyMood.reduce((acc, day) => {
-    acc[day.mood] = (acc[day.mood] || 0) + 1
-    return acc
-  }, {})
+// Tab de Análisis
+function AnalysisTab({ entries, selectedPeriod, setSelectedPeriod }) {
+  const totalEntries = entries.length
+  const avgPnL = entries.reduce((sum, entry) => sum + entry.totalPnL, 0) / totalEntries || 0
+  const avgWinRate = entries.reduce((sum, entry) => sum + entry.winRate, 0) / totalEntries || 0
+  const avgRating = entries.reduce((sum, entry) => sum + entry.sessionRating, 0) / totalEntries || 0
+  const profitableDays = entries.filter((entry) => entry.totalPnL > 0).length
+  const profitableRate = (profitableDays / totalEntries) * 100 || 0
 
   return (
     <div className="space-y-6">
       {/* Métricas generales */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-slate-800/30 rounded-2xl p-6 border border-slate-600/30 backdrop-blur-sm">
-          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-600/30 backdrop-blur-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <DollarSign className="w-6 h-6 text-green-400" />
+            <h3 className="font-semibold text-white">PnL Promedio</h3>
+          </div>
+          <p className="text-3xl font-bold text-green-400">${avgPnL.toFixed(2)}</p>
+          <p className="text-sm text-slate-400 mt-1">Por sesión</p>
+        </div>
+
+        <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-600/30 backdrop-blur-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <Target className="w-6 h-6 text-blue-400" />
+            <h3 className="font-semibold text-white">Win Rate</h3>
+          </div>
+          <p className="text-3xl font-bold text-blue-400">{avgWinRate.toFixed(1)}%</p>
+          <p className="text-sm text-slate-400 mt-1">Promedio</p>
+        </div>
+
+        <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-600/30 backdrop-blur-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <Star className="w-6 h-6 text-yellow-400" />
+            <h3 className="font-semibold text-white">Rating</h3>
+          </div>
+          <p className="text-3xl font-bold text-yellow-400">{avgRating.toFixed(1)}/10</p>
+          <p className="text-sm text-slate-400 mt-1">Autoevaluación</p>
+        </div>
+
+        <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-600/30 backdrop-blur-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <TrendingUp className="w-6 h-6 text-purple-400" />
+            <h3 className="font-semibold text-white">Días Rentables</h3>
+          </div>
+          <p className="text-3xl font-bold text-purple-400">{profitableRate.toFixed(1)}%</p>
+          <p className="text-sm text-slate-400 mt-1">
+            {profitableDays}/{totalEntries} días
+          </p>
+        </div>
+      </div>
+
+      {/* Gráfico de progreso emocional */}
+      <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-600/30 backdrop-blur-sm">
+        <h3 className="text-xl font-bold text-white mb-4">Evolución Emocional</h3>
+        <div className="space-y-4">
+          {entries
+            .slice(0, 7)
+            .reverse()
+            .map((entry, index) => (
+              <div key={entry.id} className="flex items-center justify-between">
+                <span className="text-sm text-slate-400 w-20">
+                  {new Date(entry.date).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })}
+                </span>
+                <div className="flex-1 mx-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-slate-400">Energía:</span>
+                      <div className="w-20 bg-slate-700 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-green-500 to-emerald-400 h-full rounded-full"
+                          style={{ width: `${entry.emotions.energy}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-white w-8">{entry.emotions.energy}%</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-slate-400">Estrés:</span>
+                      <div className="w-20 bg-slate-700 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-red-500 to-orange-400 h-full rounded-full"
+                          style={{ width: `${entry.emotions.stress}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-white w-8">{entry.emotions.stress}%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className={`font-bold ${entry.totalPnL >= 0 ? "text-green-400" : "text-red-400"}`}>
+                    ${entry.totalPnL.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Tab de Insights
+function InsightsTab({ entries, emociones }) {
+  // Análisis de patrones
+  const bestEmotionalState = entries.reduce((best, entry) => {
+    return entry.totalPnL > (best?.totalPnL || Number.NEGATIVE_INFINITY) ? entry : best
+  }, null)
+
+  const emotionPerformance = {}
+  entries.forEach((entry) => {
+    const emotion = entry.emotions.preSession
+    if (!emotionPerformance[emotion]) {
+      emotionPerformance[emotion] = { total: 0, count: 0, winRate: 0 }
+    }
+    emotionPerformance[emotion].total += entry.totalPnL
+    emotionPerformance[emotion].count++
+    emotionPerformance[emotion].winRate += entry.winRate
+  })
+
+  Object.keys(emotionPerformance).forEach((emotion) => {
+    emotionPerformance[emotion].avg = emotionPerformance[emotion].total / emotionPerformance[emotion].count
+    emotionPerformance[emotion].avgWinRate = emotionPerformance[emotion].winRate / emotionPerformance[emotion].count
+  })
+
+  return (
+    <div className="space-y-6">
+      {/* Insights principales */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-600/30 backdrop-blur-sm">
+          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <Brain className="w-5 h-5 text-purple-400" />
+            Estado Emocional Óptimo
+          </h3>
+          {bestEmotionalState && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                {React.createElement(emociones[bestEmotionalState.emotions.preSession].icon, {
+                  className: `w-6 h-6 ${emociones[bestEmotionalState.emotions.preSession].color}`,
+                })}
+                <span className="text-white font-medium">
+                  {emociones[bestEmotionalState.emotions.preSession].label}
+                </span>
+              </div>
+              <p className="text-sm text-slate-400">
+                Tu mejor día fue cuando iniciaste{" "}
+                {emociones[bestEmotionalState.emotions.preSession].label.toLowerCase()}y obtuviste $
+                {bestEmotionalState.totalPnL.toFixed(2)} con un {bestEmotionalState.winRate.toFixed(0)}% de win rate.
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-600/30 backdrop-blur-sm">
+          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-green-400" />
-            Energía Promedio
+            Patrón de Mejora
           </h3>
-          <div className="text-center">
-            <p className="text-3xl font-bold text-green-400 mb-2">{promedioEnergia.toFixed(0)}%</p>
-            <div className="w-full bg-slate-700 rounded-full h-3">
-              <div
-                className="bg-gradient-to-r from-green-500 to-emerald-400 h-full rounded-full transition-all duration-1000"
-                style={{ width: `${promedioEnergia}%` }}
-              ></div>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">Días rentables:</span>
+              <span className="text-green-400 font-bold">
+                {Math.round((entries.filter((e) => e.totalPnL > 0).length / entries.length) * 100)}%
+              </span>
             </div>
-          </div>
-        </div>
-
-        <div className="bg-slate-800/30 rounded-2xl p-6 border border-slate-600/30 backdrop-blur-sm">
-          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-orange-400" />
-            Estrés Promedio
-          </h3>
-          <div className="text-center">
-            <p className="text-3xl font-bold text-orange-400 mb-2">{promedioEstres.toFixed(0)}%</p>
-            <div className="w-full bg-slate-700 rounded-full h-3">
-              <div
-                className="bg-gradient-to-r from-orange-500 to-red-400 h-full rounded-full transition-all duration-1000"
-                style={{ width: `${promedioEstres}%` }}
-              ></div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-400">Mejor racha:</span>
+              <span className="text-blue-400 font-bold">5 días</span>
             </div>
-          </div>
-        </div>
-
-        <div className="bg-slate-800/30 rounded-2xl p-6 border border-slate-600/30 backdrop-blur-sm">
-          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <Heart className="w-5 h-5 text-pink-400" />
-            Bienestar General
-          </h3>
-          <div className="text-center">
-            <p className="text-3xl font-bold text-pink-400 mb-2">{mentalStats.bienestarGeneral}%</p>
-            <div className="w-full bg-slate-700 rounded-full h-3">
-              <div
-                className="bg-gradient-to-r from-pink-500 to-purple-400 h-full rounded-full transition-all duration-1000"
-                style={{ width: `${mentalStats.bienestarGeneral}%` }}
-              ></div>
-            </div>
+            <p className="text-sm text-slate-400">Tu consistencia ha mejorado un 23% en las últimas 2 semanas.</p>
           </div>
         </div>
       </div>
 
-      {/* Distribución de estados de ánimo */}
-      <div className="bg-slate-800/30 rounded-2xl p-6 border border-slate-600/30 backdrop-blur-sm">
-        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-blue-400" />
-          Distribución de Estados de Ánimo
-        </h3>
-        <div className="space-y-4">
-          {Object.entries(distribucionMood).map(([mood, count]) => (
-            <div key={mood} className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {React.createElement(moods[mood].icon, {
-                  className: `w-5 h-5 ${moods[mood].color}`,
+      {/* Performance por estado emocional */}
+      <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-600/30 backdrop-blur-sm">
+        <h3 className="text-xl font-bold text-white mb-4">Performance por Estado Emocional Inicial</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Object.entries(emotionPerformance).map(([emotion, data]) => (
+            <div key={emotion} className="bg-slate-700/30 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                {React.createElement(emociones[emotion]?.icon || Meh, {
+                  className: `w-5 h-5 ${emociones[emotion]?.color || "text-slate-400"}`,
                 })}
-                <span className="text-white font-medium">{moods[mood].label}</span>
+                <span className="font-medium text-white">{emociones[emotion]?.label || emotion}</span>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-32 bg-slate-700 rounded-full h-3">
-                  <div
-                    className={`h-full rounded-full transition-all duration-1000 ${
-                      mood === "happy"
-                        ? "bg-gradient-to-r from-green-500 to-emerald-400"
-                        : mood === "neutral"
-                          ? "bg-gradient-to-r from-blue-500 to-cyan-400"
-                          : "bg-gradient-to-r from-red-500 to-pink-400"
-                    }`}
-                    style={{ width: `${(count / dailyMood.length) * 100}%` }}
-                  ></div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">PnL Promedio:</span>
+                  <span className={`font-bold ${data.avg >= 0 ? "text-green-400" : "text-red-400"}`}>
+                    ${data.avg.toFixed(2)}
+                  </span>
                 </div>
-                <span className="text-white font-bold w-8">{count}</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Win Rate:</span>
+                  <span className="text-blue-400 font-bold">{data.avgWinRate.toFixed(0)}%</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Sesiones:</span>
+                  <span className="text-white">{data.count}</span>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Insights y recomendaciones */}
-      <div className="bg-slate-800/30 rounded-2xl p-6 border border-slate-600/30 backdrop-blur-sm">
+      {/* Recomendaciones */}
+      <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-600/30 backdrop-blur-sm">
         <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <Eye className="w-5 h-5 text-purple-400" />
-          Insights y Recomendaciones
+          <AlertTriangle className="w-5 h-5 text-yellow-400" />
+          Recomendaciones Basadas en Datos
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-slate-700/30 rounded-xl p-4">
-            <h4 className="font-semibold text-white mb-2">Patrón Identificado</h4>
-            <p className="text-sm text-slate-400">
-              Tu energía es más alta los{" "}
-              {dailyMood.filter((d) => d.energia > 80).length > 3 ? "primeros días de la semana" : "fines de semana"}.
+          <div className="bg-slate-700/30 rounded-lg p-4">
+            <h4 className="font-semibold text-green-400 mb-2">Fortalezas</h4>
+            <ul className="space-y-1 text-sm text-slate-300">
+              <li>• Tu mejor rendimiento ocurre cuando inicias confiado</li>
+              <li>• Mantienes disciplina en la gestión de riesgo</li>
+              <li>• Tus autoevaluaciones son realistas</li>
+            </ul>
+          </div>
+          <div className="bg-slate-700/30 rounded-lg p-4">
+            <h4 className="font-semibold text-red-400 mb-2">Áreas de Mejora</h4>
+            <ul className="space-y-1 text-sm text-slate-300">
+              <li>• Evita tradear cuando inicias ansioso</li>
+              <li>• Implementa rutina pre-trading más sólida</li>
+              <li>• Considera sesiones más cortas los días estresantes</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Componente EntryCard
+function EntryCard({ entry, emociones, isToday = false }) {
+  const [isExpanded, setIsExpanded] = useState(isToday)
+
+  return (
+    <div
+      className={`bg-slate-800/30 rounded-xl border backdrop-blur-sm transition-all duration-300 ${
+        isToday ? "border-blue-500/50 bg-blue-500/10" : "border-slate-600/30 hover:border-slate-500/50"
+      }`}
+    >
+      {/* Header de la entrada */}
+      <div className="p-6 border-b border-slate-600/30">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col">
+              <h3 className="text-lg font-bold text-white">
+                {new Date(entry.date).toLocaleDateString("es-AR", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </h3>
+              {isToday && <span className="text-xs text-blue-400 uppercase tracking-wide">Sesión de hoy</span>}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <div className={`text-2xl font-bold ${entry.totalPnL >= 0 ? "text-green-400" : "text-red-400"}`}>
+                {entry.totalPnL >= 0 ? "+" : ""}${entry.totalPnL.toFixed(2)}
+              </div>
+              <div className="text-sm text-slate-400">
+                {entry.tradesCount} trades • {entry.winRate.toFixed(0)}% win rate
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {[...Array(10)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-3 h-3 ${i < entry.sessionRating ? "text-yellow-400 fill-current" : "text-slate-600"}`}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors"
+            >
+              <Eye className="w-4 h-4 text-slate-400" />
+            </button>
+          </div>
+        </div>
+
+        {/* Estados emocionales */}
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-400">Pre-sesión:</span>
+            <div className={`flex items-center gap-2 px-2 py-1 rounded-lg ${emociones[entry.emotions.preSession].bg}`}>
+              {React.createElement(emociones[entry.emotions.preSession].icon, {
+                className: `w-4 h-4 ${emociones[entry.emotions.preSession].color}`,
+              })}
+              <span className="text-xs text-white">{emociones[entry.emotions.preSession].label}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-400">Post-sesión:</span>
+            <div className={`flex items-center gap-2 px-2 py-1 rounded-lg ${emociones[entry.emotions.postSession].bg}`}>
+              {React.createElement(emociones[entry.emotions.postSession].icon, {
+                className: `w-4 h-4 ${emociones[entry.emotions.postSession].color}`,
+              })}
+              <span className="text-xs text-white">{emociones[entry.emotions.postSession].label}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Energía:</span>
+              <div className="w-16 bg-slate-700 rounded-full h-2">
+                <div
+                  className="bg-gradient-to-r from-green-500 to-emerald-400 h-full rounded-full"
+                  style={{ width: `${entry.emotions.energy}%` }}
+                ></div>
+              </div>
+              <span className="text-xs text-white">{entry.emotions.energy}%</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Estrés:</span>
+              <div className="w-16 bg-slate-700 rounded-full h-2">
+                <div
+                  className="bg-gradient-to-r from-red-500 to-orange-400 h-full rounded-full"
+                  style={{ width: `${entry.emotions.stress}%` }}
+                ></div>
+              </div>
+              <span className="text-xs text-white">{entry.emotions.stress}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contenido expandible */}
+      {isExpanded && (
+        <div className="p-6 space-y-6">
+          {/* Trades */}
+          {entry.trades.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-blue-400" />
+                Trades del Día
+              </h4>
+              <div className="space-y-2">
+                {entry.trades.map((trade, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm text-slate-400">{trade.time}</span>
+                      <span className="font-medium text-white">{trade.pair}</span>
+                      <span
+                        className={`text-xs px-2 py-1 rounded ${
+                          trade.type === "BUY" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                        }`}
+                      >
+                        {trade.type}
+                      </span>
+                      <div className={`flex items-center gap-1 px-2 py-1 rounded-lg ${emociones[trade.emotion].bg}`}>
+                        {React.createElement(emociones[trade.emotion].icon, {
+                          className: `w-3 h-3 ${emociones[trade.emotion].color}`,
+                        })}
+                        <span className="text-xs text-white">{emociones[trade.emotion].label}</span>
+                      </div>
+                    </div>
+                    <span className={`font-bold ${trade.result >= 0 ? "text-green-400" : "text-red-400"}`}>
+                      {trade.result >= 0 ? "+" : ""}${trade.result.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Journal sections */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-semibold text-white mb-2">Aprendizajes del Día</h4>
+              <p className="text-sm text-slate-300 bg-slate-700/30 rounded-lg p-3">
+                {entry.learnings || "No hay aprendizajes registrados."}
+              </p>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-white mb-2">Áreas de Mejora</h4>
+              <p className="text-sm text-slate-300 bg-slate-700/30 rounded-lg p-3">
+                {entry.improvements || "No hay mejoras registradas."}
+              </p>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-white mb-2">Gratitud</h4>
+              <p className="text-sm text-slate-300 bg-slate-700/30 rounded-lg p-3">
+                {entry.gratitude || "No hay notas de gratitud."}
+              </p>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-white mb-2">Plan para Mañana</h4>
+              <p className="text-sm text-slate-300 bg-slate-700/30 rounded-lg p-3">
+                {entry.tomorrowPlan || "No hay plan registrado."}
+              </p>
+            </div>
+          </div>
+
+          {/* Condiciones del mercado */}
+          <div>
+            <h4 className="font-semibold text-white mb-2">Condiciones del Mercado</h4>
+            <p className="text-sm text-slate-300 bg-slate-700/30 rounded-lg p-3">
+              {entry.marketConditions || "No hay notas sobre condiciones del mercado."}
             </p>
           </div>
-          <div className="bg-slate-700/30 rounded-xl p-4">
-            <h4 className="font-semibold text-white mb-2">Recomendación</h4>
-            <p className="text-sm text-slate-400">
-              {promedioEstres > 50
-                ? "Considera aumentar las sesiones de meditación para reducir el estrés."
-                : "Mantén tu rutina actual, tu nivel de estrés está controlado."}
-            </p>
+
+          {/* Objetivos */}
+          {entry.goals.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-white mb-3">Objetivos del Día</h4>
+              <div className="flex flex-wrap gap-2">
+                {entry.goals.map((goal, index) => (
+                  <span key={index} className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs">
+                    {goal}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Modal para nueva entrada
+function NewEntryModal({ entry, setEntry, emociones, onSave, onClose, addTrade }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-6 z-50">
+      <div className="bg-slate-800/90 backdrop-blur-sm rounded-2xl border border-slate-600/30 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-slate-800/90 backdrop-blur-sm p-6 border-b border-slate-600/30">
+          <div className="flex items-center justify-between">
+            <h3 className="text-2xl font-bold text-white">Nueva Entrada de Journal</h3>
+            <button onClick={onClose} className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors">
+              <X className="w-5 h-5 text-slate-400" />
+            </button>
           </div>
-          <div className="bg-slate-700/30 rounded-xl p-4">
-            <h4 className="font-semibold text-white mb-2">Objetivo Sugerido</h4>
-            <p className="text-sm text-slate-400">
-              Intenta mantener tu energía por encima del 75% durante toda la semana.
-            </p>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* Fecha */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Fecha</label>
+            <input
+              type="date"
+              value={entry.date}
+              onChange={(e) => setEntry((prev) => ({ ...prev, date: e.target.value }))}
+              className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+            />
           </div>
-          <div className="bg-slate-700/30 rounded-xl p-4">
-            <h4 className="font-semibold text-white mb-2">Próximo Hito</h4>
-            <p className="text-sm text-slate-400">
-              Te faltan {30 - mentalStats.rachaActual} días para alcanzar una racha de 30 días.
-            </p>
+
+          {/* Estados emocionales */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-3">Estado Pre-Sesión</label>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(emociones).map(([key, emotion]) => (
+                  <button
+                    key={key}
+                    onClick={() => setEntry((prev) => ({ ...prev, emotions: { ...prev.emotions, preSession: key } }))}
+                    className={`flex items-center gap-2 p-3 rounded-lg border transition-all duration-300 ${
+                      entry.emotions.preSession === key
+                        ? `border-blue-500 ${emotion.bg}`
+                        : "border-slate-600 bg-slate-700/30 hover:border-slate-500"
+                    }`}
+                  >
+                    <emotion.icon className={`w-4 h-4 ${emotion.color}`} />
+                    <span className="text-xs text-white">{emotion.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-3">Estado Post-Sesión</label>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(emociones).map(([key, emotion]) => (
+                  <button
+                    key={key}
+                    onClick={() => setEntry((prev) => ({ ...prev, emotions: { ...prev.emotions, postSession: key } }))}
+                    className={`flex items-center gap-2 p-3 rounded-lg border transition-all duration-300 ${
+                      entry.emotions.postSession === key
+                        ? `border-blue-500 ${emotion.bg}`
+                        : "border-slate-600 bg-slate-700/30 hover:border-slate-500"
+                    }`}
+                  >
+                    <emotion.icon className={`w-4 h-4 ${emotion.color}`} />
+                    <span className="text-xs text-white">{emotion.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Niveles emocionales */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-medium text-slate-300">Nivel de Energía</label>
+                <span className="text-sm text-white">{entry.emotions.energy}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={entry.emotions.energy}
+                onChange={(e) =>
+                  setEntry((prev) => ({
+                    ...prev,
+                    emotions: { ...prev.emotions, energy: Number.parseInt(e.target.value) },
+                  }))
+                }
+                className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-medium text-slate-300">Nivel de Estrés</label>
+                <span className="text-sm text-white">{entry.emotions.stress}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={entry.emotions.stress}
+                onChange={(e) =>
+                  setEntry((prev) => ({
+                    ...prev,
+                    emotions: { ...prev.emotions, stress: Number.parseInt(e.target.value) },
+                  }))
+                }
+                className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-medium text-slate-300">Nivel de Confianza</label>
+                <span className="text-sm text-white">{entry.emotions.confidence}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={entry.emotions.confidence}
+                onChange={(e) =>
+                  setEntry((prev) => ({
+                    ...prev,
+                    emotions: { ...prev.emotions, confidence: Number.parseInt(e.target.value) },
+                  }))
+                }
+                className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+          </div>
+
+          {/* Trades */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-sm font-medium text-slate-300">Trades del Día</label>
+              <button
+                onClick={addTrade}
+                className="flex items-center gap-1 px-3 py-1 bg-blue-600/20 hover:bg-blue-600/30 rounded-lg transition-colors text-blue-400 text-sm"
+              >
+                <Plus className="w-3 h-3" />
+                Agregar Trade
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {entry.trades.map((trade, index) => (
+                <div key={index} className="grid grid-cols-1 md:grid-cols-5 gap-3 p-3 bg-slate-700/30 rounded-lg">
+                  <input
+                    type="text"
+                    placeholder="Par (EUR/USD)"
+                    value={trade.pair}
+                    onChange={(e) => {
+                      const newTrades = [...entry.trades]
+                      newTrades[index].pair = e.target.value
+                      setEntry((prev) => ({ ...prev, trades: newTrades }))
+                    }}
+                    className="px-3 py-2 bg-slate-600/50 border border-slate-500 rounded text-white text-sm focus:border-blue-500 focus:outline-none"
+                  />
+
+                  <select
+                    value={trade.type}
+                    onChange={(e) => {
+                      const newTrades = [...entry.trades]
+                      newTrades[index].type = e.target.value
+                      setEntry((prev) => ({ ...prev, trades: newTrades }))
+                    }}
+                    className="px-3 py-2 bg-slate-600/50 border border-slate-500 rounded text-white text-sm focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="BUY">BUY</option>
+                    <option value="SELL">SELL</option>
+                  </select>
+
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="Resultado ($)"
+                    value={trade.result}
+                    onChange={(e) => {
+                      const newTrades = [...entry.trades]
+                      newTrades[index].result = Number.parseFloat(e.target.value) || 0
+                      setEntry((prev) => ({ ...prev, trades: newTrades }))
+                    }}
+                    className="px-3 py-2 bg-slate-600/50 border border-slate-500 rounded text-white text-sm focus:border-blue-500 focus:outline-none"
+                  />
+
+                  <select
+                    value={trade.emotion}
+                    onChange={(e) => {
+                      const newTrades = [...entry.trades]
+                      newTrades[index].emotion = e.target.value
+                      setEntry((prev) => ({ ...prev, trades: newTrades }))
+                    }}
+                    className="px-3 py-2 bg-slate-600/50 border border-slate-500 rounded text-white text-sm focus:border-blue-500 focus:outline-none"
+                  >
+                    {Object.entries(emociones).map(([key, emotion]) => (
+                      <option key={key} value={key}>
+                        {emotion.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    onClick={() => {
+                      const newTrades = entry.trades.filter((_, i) => i !== index)
+                      setEntry((prev) => ({ ...prev, trades: newTrades }))
+                    }}
+                    className="p-2 bg-red-500/20 hover:bg-red-500/30 rounded text-red-400 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Journal sections */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Aprendizajes del Día</label>
+              <textarea
+                value={entry.learnings}
+                onChange={(e) => setEntry((prev) => ({ ...prev, learnings: e.target.value }))}
+                placeholder="¿Qué aprendiste hoy? ¿Qué patrones notaste?"
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none resize-none"
+                rows={4}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Áreas de Mejora</label>
+              <textarea
+                value={entry.improvements}
+                onChange={(e) => setEntry((prev) => ({ ...prev, improvements: e.target.value }))}
+                placeholder="¿Qué puedes mejorar para la próxima sesión?"
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none resize-none"
+                rows={4}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Gratitud</label>
+              <textarea
+                value={entry.gratitude}
+                onChange={(e) => setEntry((prev) => ({ ...prev, gratitude: e.target.value }))}
+                placeholder="¿Por qué estás agradecido hoy?"
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none resize-none"
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Plan para Mañana</label>
+              <textarea
+                value={entry.tomorrowPlan}
+                onChange={(e) => setEntry((prev) => ({ ...prev, tomorrowPlan: e.target.value }))}
+                placeholder="¿Cuál es tu plan para la próxima sesión?"
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none resize-none"
+                rows={3}
+              />
+            </div>
+          </div>
+
+          {/* Condiciones del mercado y rating */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Condiciones del Mercado</label>
+              <textarea
+                value={entry.marketConditions}
+                onChange={(e) => setEntry((prev) => ({ ...prev, marketConditions: e.target.value }))}
+                placeholder="¿Cómo estaba el mercado hoy? Volatilidad, noticias, etc."
+                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none resize-none"
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-medium text-slate-300">Rating de la Sesión</label>
+                <span className="text-sm text-white">{entry.sessionRating}/10</span>
+              </div>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={entry.sessionRating}
+                onChange={(e) => setEntry((prev) => ({ ...prev, sessionRating: Number.parseInt(e.target.value) }))}
+                className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+              />
+              <div className="flex justify-between text-xs text-slate-400 mt-1">
+                <span>Muy malo</span>
+                <span>Excelente</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer del modal */}
+        <div className="sticky bottom-0 bg-slate-800/90 backdrop-blur-sm p-6 border-t border-slate-600/30">
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-2 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg transition-colors text-white"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={onSave}
+              className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 rounded-lg transition-all duration-300 font-semibold text-white"
+            >
+              Guardar Entrada
+            </button>
           </div>
         </div>
       </div>
